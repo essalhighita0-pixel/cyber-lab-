@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>صفحتي — Ghita</title>
+  <style>
+    :root{--accent:#2563eb;--bg:#f8fafc;--card:#ffffff;--muted:#6b7280}
+    *{box-sizing:border-box;font-family:Inter, "Segoe UI", Tahoma, Sans-Serif}
+    body{margin:0;background:var(--bg);color:#0f172a;padding:18px}
+    .wrap{max-width:900px;margin:24px auto}
+    header{background:var(--card);padding:20px;border-radius:14px;box-shadow:0 6px 18px rgba(2,6,23,0.06);display:flex;gap:16px;align-items:center}
+    .avatar{width:88px;height:88px;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#ebf8ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:28px}
+    h1{margin:0;font-size:22px}
+    p.tag{margin:6px 0 0;color:var(--muted)}
+    main{margin-top:18px;display:grid;grid-template-columns:1fr;gap:12px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 12px rgba(2,6,23,0.04)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    button{padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .btn-primary{background:var(--accent);color:white}
+    .btn-ghost{background:transparent;border:1px solid #e6edf8}
+    ul.posts{list-style:none;padding:0;margin:0}
+    ul.posts li{padding:10px 12px;border-radius:8px;margin-bottom:8px;background:#fbfdff;border:1px solid #eef3ff}
+    footer{margin-top:12px;color:var(--muted);font-size:14px;text-align:center}
+    @media(min-width:720px){main{grid-template-columns:1fr 320px}}
+    /* tiny form styling */
+    .form-row{display:flex;gap:8px}
+    input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid #e6eefb}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="avatar">G</div>
+      <div>
+        <h1>Ghita — تعلم الأمن السيبراني بالدارجة</h1>
+        <p class="tag">بوستات قصيرة، نصائح حماية، ومختبر منزلي</p>
+        <div class="actions">
+          <button class="btn-primary" id="btn-follow">Follow</button>
+          <button class="btn-ghost" id="btn-contact">Contact</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>أضف منشور جديد</h2>
+        <div style="margin-top:8px">
+          <div class="form-row">
+            <input id="newPost" type="text" placeholder="عنوان المنشور ولا ملخص صغير" />
+            <button id="addPost" class="btn-primary">نشر</button>
+          </div>
+          <p style="margin-top:8px;color:var(--muted);font-size:14px">المحتوى محفوظ فقط محلياً فهاد الصفحة (localStorage) — يمكنك تعديله قبل النشر الحقيقي.</p>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h3>حول</h3>
+        <p>هنا تكتب سيرة قصيرة، روابط إلى إنستا و GitHub، أو تحط highlight لروابط مهمة.</p>
+        <h4 style="margin-top:12px">روابط سريعة</h4>
+        <ul style="padding-left:14px;color:var(--muted)">
+          <li>Instagram: @cyber.ghita</li>
+          <li>GitHub: ghita</li>
+          <li>مثال تحذيري: <strong>instagrarn.com</strong> — دومين مزيف (typosquatting) كيبان شبيه بإنستغرام، مَثَل للتوعية فقط</li>
+        </ul>
+      </aside>
+
+      <section class="card" style="grid-column:1/ -1">
+        <h2>آخر المنشورات</h2>
+        <ul id="posts" class="posts"></ul>
+      </section>
+
+    </main>
+
+    <footer class="card">© <span id="year"></span> — موقع تعليمي بسيط من Ghita</footer>
+  </div>
+
+  <script>
+    // Simple local site behavior (no server) — data saved locally
+    const postsEl = document.getElementById('posts');
+    const input = document.getElementById('newPost');
+    const addBtn = document.getElementById('addPost');
+    const yearSpan = document.getElementById('year');
+    yearSpan.textContent = new Date().getFullYear();
+
+    function loadPosts(){
+      const data = JSON.parse(localStorage.getItem('ghita_posts') || '[]');
+      postsEl.innerHTML = '';
+      data.reverse().forEach((p, idx)=>{
+        const li = document.createElement('li');
+        li.textContent = p;
+        const rm = document.createElement('button');
+        rm.textContent = 'حيد'; rm.style.marginLeft='8px'; rm.style.border='0'; rm.style.background='transparent'; rm.style.cursor='pointer';
+        rm.onclick = ()=>{ removePost(data.length - 1 - idx); };
+        li.appendChild(rm);
+        postsEl.appendChild(li);
+      });
+    }
+
+    function savePosts(arr){ localStorage.setItem('ghita_posts', JSON.stringify(arr)); loadPosts(); }
+    function addPost(){
+      const v = input.value.trim(); if(!v) return alert('كتب شي حاجة باش تنشر');
+      const data = JSON.parse(localStorage.getItem('ghita_posts')||'[]');
+      data.push(v); savePosts(data); input.value='';
+    }
+    function removePost(i){ const data = JSON.parse(localStorage.getItem('ghita_posts')||'[]'); data.splice(i,1); savePosts(data); }
+
+    addBtn.addEventListener('click', addPost);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') addPost(); });
+    loadPosts();
+
+    // follow/contact demo
+    document.getElementById('btn-follow').addEventListener('click', ()=>{ alert(' simulated follow — هذا غير مثال محلي فقط'); });
+    document.getElementById('btn-contact').addEventListener('click', ()=>{ prompt('عطيني الإيميل ديالك باش نتواصل (مثال)'); });
+  </script>
+</body>
+</html>
